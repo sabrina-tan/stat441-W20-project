@@ -1,0 +1,58 @@
+library(xgboost)
+library(tidyverse)
+
+train <- read.csv("GitHub/stat441-W20-project/03-data-creation/train_processed_2.csv", header = TRUE)
+test <- read.csv("GitHub/stat441-W20-project/03-data-creation/test_processed_2.csv", header = TRUE)
+train_ids <- train[,"id"]
+train_satisfied <- train[,"satisfied"]
+test_ids <- test[,"id"]
+train <- train %>% select(-"satisfied", -"X", -"id")
+test <- test %>% select (-"X", -"id")
+
+train_matrix <- data.matrix(train)
+test_matrix <- data.matrix(test)
+
+# 70/30 training test split on training set to measure performance before applying to actual test set
+set.seed(24)
+sample_size <- floor(nrow(train_matrix)*.7)
+train_ind <- sample(seq_len(nrow(train_matrix)), size = sample_size)
+training_data <- train_matrix[train_ind, ]
+training_satisfied <- train_satisfied[train_ind]
+testing_data <- train_matrix[-train_ind,]
+testing_satisfied <- train_satisfied[-train_ind]
+
+dtrain <- xgb.DMatrix(data = training_data, label = training_satisfied)
+dtest <- xgb.DMatrix(data = testing_data, label = testing_satisfied)
+
+# can tune parameters here 
+
+model <- xgboost(data = dtrain, nrounds = 30, objective = "binary:logistic", max.depth = 5)
+
+pred <- predict(model, dtest)
+err <- mean(as.numeric(pred > 0.5) != testing_satisfied)
+print(paste("test-error =", err))
+
+importance_matrix <- xgb.importance(names(train_matrix), model = model)
+xgb.plot.importance(importance_matrix)
+
+
+important_features <- importance_matrix[importance_matrix$Gain>=0.001,]$Feature
+training_data_reduced <- training_data[,important_features]
+testing_data_reduced <- testing_data[,important_features]
+dtrain_reduced <- xgb.DMatrix(data = training_data_reduced, label = training_satisfied)
+dtest_reduced <- xgb.DMatrix(data = testing_data_reduced, label = testing_satisfied)
+
+model_reduced <- xgboost(data = dtrain_reduced, nrounds = 30, objective = "binary:logistic", max.depth = 5)
+
+pred_reduced <- predict(model_reduced, dtest_reduced)
+err <- mean(as.numeric(pred_reduced > 0.5) != testing_satisfied)
+print(paste("test-error =", err))
+
+dtest_submit <- xgb.DMatrix(data = test_matrix)
+pred_submit <- predict(model, dtest_submit)
+pred_submit <- as.numeric(pred_submit>0.5)
+
+predictions <- data.frame(id = test_ids, Predicted = pred_submit)
+write.csv(predictions,"/Users/dylanlee/GitHub/stat441-W20-project/04-modelling/test_pred_full_xgboost_model.csv", row.names = FALSE)
+
+# Score : 0.79661
