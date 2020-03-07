@@ -64,8 +64,10 @@ print(paste("test-error =", err))
 roc_obj <- roc(testing_satisfied, pred_reduced)
 auc(roc_obj)
 
-dtest_submit <- xgb.DMatrix(data = test_matrix)
-pred_submit <- predict(model, dtest_submit)
+# reduced model performs better
+
+dtest_submit <- xgb.DMatrix(data = test_matrix[,important_features])
+pred_submit <- predict(model_reduced, dtest_submit)
 # pred_submit <- as.numeric(pred_submit>0.5)
 
 predictions <- data.frame(id = test_ids, Predicted = pred_submit)
