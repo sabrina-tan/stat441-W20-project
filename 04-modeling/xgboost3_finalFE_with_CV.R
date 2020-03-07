@@ -56,7 +56,7 @@ testing_data_reduced <- testing_data[,important_features]
 dtrain_reduced <- xgb.DMatrix(data = training_data_reduced, label = training_satisfied)
 dtest_reduced <- xgb.DMatrix(data = testing_data_reduced, label = testing_satisfied)
 
-model_reduced <- xgb.train(data = dtrain_reduced, nrounds = 30, objective = "binary:logistic", max.depth = 5)
+model_reduced <- xgb.train(data = dtrain_reduced, nrounds = cv$best_iteration, objective = "binary:logistic", max.depth = 5)
 
 pred_reduced <- predict(model_reduced, dtest_reduced)
 err <- mean(as.numeric(pred_reduced > 0.5) != testing_satisfied)
