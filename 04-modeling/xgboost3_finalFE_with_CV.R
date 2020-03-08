@@ -66,11 +66,21 @@ auc(roc_obj)
 
 # reduced model performs better
 
+# Need the training predictions as well to use as a feature
 dtest_submit <- xgb.DMatrix(data = test_matrix[,important_features])
-pred_submit <- predict(model_reduced, dtest_submit)
+test_pred_submit <- predict(model_reduced, dtest_submit)
+
+dtrain_submit <- xgb.DMatrix(data = train_matrix[,important_features])
+train_pred_submit <- predict(model_reduced, dtrain_submit)
+
 # pred_submit <- as.numeric(pred_submit>0.5)
 
-predictions <- data.frame(id = test_ids, Predicted = pred_submit)
-write.csv(predictions,paste0(pathname,"/04-modeling/stacking_predictions/fe_data_Final_xgboost_with_CV_no_rounding.csv"), row.names = FALSE)
+test_predictions <- data.frame(id = test_ids, Predicted = test_pred_submit)
+train_predictions <- data.frame(id = train_ids, Predicted = train_pred_submit)
+
+
+write.csv(test_predictions,paste0(pathname,"/04-modeling/stacking_predictions/test_fe_data_Final_xgboost_with_CV_no_rounding.csv"), row.names = FALSE)
+
+write.csv(train_predictions,paste0(pathname,"/04-modeling/stacking_predictions/train_fe_data_Final_xgboost_with_CV_no_rounding.csv"), row.names = FALSE)
 
 # Score : 0.79661
