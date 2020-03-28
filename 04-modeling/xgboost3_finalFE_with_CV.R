@@ -49,6 +49,13 @@ auc(roc_obj)
 importance_matrix <- xgb.importance(names(train_matrix), model = model)
 xgb.plot.importance(importance_matrix)
 
+ggplot(importance_matrix, aes(x=reorder(importance_matrix$Feature, -importance_matrix$Gain), y=importance_matrix$Gain))+
+  geom_bar(stat="identity", width=0.7, fill="steelblue")+
+  theme_classic()+
+  ylab("Feature Importance Score") +
+  ggtitle("Feature Importance") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), axis.title.x = element_blank(), plot.title = element_text(hjust = 0.5))
+  
 
 important_features <- importance_matrix[importance_matrix$Gain>=0.001,]$Feature
 training_data_reduced <- training_data[,important_features]

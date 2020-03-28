@@ -3,10 +3,10 @@ library(tidyverse)
 library(pROC)
 
 
-pathname = "/Users/sabrinatan/Desktop/STAT 441/stat441-W20-project/"
+pathname = "/Users/dylanlee/GitHub/stat441-W20-project"
 
-train <- read.csv(paste0(pathname, "03-data-creation/train_FE.csv"), header = TRUE)
-test <- read.csv(paste0(pathname, "03-data-creation/test_FE.csv"), header = TRUE)
+train <- read.csv(paste0(pathname, "/03-data-creation/train_FE.csv"), header = TRUE)
+test <- read.csv(paste0(pathname, "/03-data-creation/test_FE.csv"), header = TRUE)
 
 train_ids <- train[,"id"]
 train_satisfied <- train[,"satisfied"]
@@ -74,6 +74,6 @@ pred_submit <- predict(model, dtest_submit)
 pred_submit <- as.numeric(pred_submit>0.5)
 
 predictions <- data.frame(id = test_ids, Predicted = pred_submit)
-write.csv(predictions,paste0(pathname,"/04-modeling/fe_data_full_xgboost_model.csv"), row.names = FALSE)
+# write.csv(predictions,paste0(pathname,"/04-modeling/fe_data_full_xgboost_model.csv"), row.names = FALSE)
 
 # Score : 0.79661
